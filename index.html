@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pengingat Jadwal Pelajaran SD</title>
+<style>
+    /* --- FONTS & BASE STYLING --- */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary: #4CAF50;
+        --primary-dark: #2E7D32;
+        --primary-light: #8BC34A;
+        --accent: #FFEB3B;
+        --text: #333;
+        --text-light: #666;
+        --bg-light: rgba(255, 255, 255, 0.9);
+        --bg-lighter: rgba(255, 255, 255, 0.7);
+        --danger: #e74c3c;
+        --success: #27ae60;
+        --warning: #f39c12;
+        --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.15);
+        --shadow-lg: 0 15px 35px rgba(0, 0, 0, 0.2);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --transition-slow: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --border-radius: 16px;
+        --border-radius-sm: 8px;
+    }
+
+    body {
+        font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light), var(--accent));
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* --- Glassmorphism Effect --- */
+    .glass {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .glass-dark {
+        background: rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* --- Style Login Overlay --- */
+    #loginOverlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light), var(--accent));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        flex-direction: column;
+        padding: 20px;
+        transition: var(--transition-slow);
+        opacity: 1;
+        animation: fadeInOverlay 0.8s ease forwards;
+    }
+
+    @keyframes fadeInOverlay {
+        from { 
+            opacity: 0; 
+            backdrop-filter: blur(0);
+        }
+        to { 
+            opacity: 1; 
+            backdrop-filter: blur(10px);
+        }
+    }
+
+    #loginOverlay.hidden {
+        opacity: 0;
+        backdrop-filter: blur(0);
+        pointer-events: none;
+    }
+
+    #loginBox {
+        background: var(--bg-light);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        color: var(--text);
+        padding: 40px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        width: 380px;
+        max-width: 90vw;
+        text-align: center;
+        transform: translateY(20px) scale(0.95);
+        animation: slideUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #loginBox::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            45deg,
+            transparent, 
+            rgba(255, 255, 255, 0.1), 
+            transparent
+        );
+        transform: rotate(45deg);
+        animation: shimmer 3s infinite linear;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    @keyframes slideUp {
+        to { 
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+
+    .school-logo {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #ffffff, #C8E6C9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        transition: var(--transition);
+        position: relative;
+        z-index: 2;
+    }
+
+    .school-logo:hover {
+        transform: scale(1.05) rotate(5deg);
+        box-shadow: 0 12px 30px rgba(76, 175, 80, 0.6);
+    }
+
+    .school-logo img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+        border-radius: 50%;
+    }
+
+    #loginBox h2 {
+        margin-bottom: 25px;
+        color: var(--primary-dark);
+        font-weight: 700;
+        font-size: 2rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 2;
+    }
+
+    #passwordInput {
+        width: 100%;
+        padding: 15px 20px;
+        font-size: 1.1rem;
+        border: 2px solid rgba(76, 175, 80, 0.3);
+        border-radius: 12px;
+        outline: none;
+        background: var(--bg-light);
+        color: var(--text);
+        transition: var(--transition);
+        margin-bottom: 5px;
+        position: relative;
+        z-index: 2;
+    }
+
+    #passwordInput::placeholder {
+        color: rgba(0, 0, 0, 0.5);
+    }
+
+    #passwordInput:focus {
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 1);
+        box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        transform: translateY(-2px);
+    }
+
+    #loginBtn {
+        margin-top: 20px;
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 2;
+        overflow: hidden;
+    }
+
+    #loginBtn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: var(--transition-slow);
+    }
+
+    #loginBtn:hover::before {
+        left: 100%;
+    }
+
+    #loginBtn:hover {
+        background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+        box-shadow: 0 8px 20px rgba(46, 125, 50, 0.6);
+        transform: translateY(-3px);
+    }
+
+    #loginBtn:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 10px rgba(46, 125, 50, 0.4);
+    }
+
+    #errorMsg {
+        margin-top: 15px;
+        color: var(--danger);
+        font-weight: 600;
+        min-height: 1.2em;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 2;
+    }
+
+    /* --- Style utama --- */
+    header {
+        background: rgba(139, 195, 74, 0.9);
+        padding: 20px;
+        box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+        background-size: 200% 100%;
+        animation: gradientFlow 3s infinite linear;
+    }
+
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .header-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #ffffff, #C8E6C9);
+        padding: 5px;
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        transition: var(--transition);
+    }
+
+    .header-logo:hover {
+        transform: rotate(10deg) scale(1.05);
+        box-shadow: 0 8px 20px rgba(76, 175, 80, 0.5);
+    }
+
+    .header-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .school-title {
+        text-align: center;
+    }
+
+    h1 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 2.2rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(45deg, #ffffff, var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .container {
+        margin: 30px auto;
+        max-width: 900px;
+        padding: 0 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg-light);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        margin-bottom: 30px;
+        color: var(--text);
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        backdrop-filter: blur(10px);
+    }
+
+    table:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: center;
+        border: 1px solid rgba(200, 230, 201, 0.8);
+        transition: var(--transition);
+    }
+
+    th {
+        background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+        color: #ffffff;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    th::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transform: translateX(-100%);
+    }
+
+    table:hover th::after {
+        animation: shimmerHeader 1.5s infinite;
+    }
+
+    @keyframes shimmerHeader {
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    tr {
+        transition: var(--transition);
+    }
+
+    tr:nth-child(even) {
+        background: rgba(200, 230, 201, 0.3);
+    }
+
+    tr:hover {
+        background: rgba(139, 195, 74, 0.2);
+        transform: scale(1.01);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-section {
+        background: var(--bg-light);
+        padding: 25px;
+        margin-bottom: 30px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        color: var(--text);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        transition: var(--transition);
+    }
+
+    .form-section:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .form-section h2 {
+        margin-bottom: 20px;
+        color: var(--primary-dark);
+        font-size: 1.5rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    input, select {
+        padding: 12px 15px;
+        margin: 8px;
+        border-radius: var(--border-radius-sm);
+        border: 2px solid rgba(76, 175, 80, 0.3);
+        font-size: 1rem;
+        background: var(--bg-light);
+        color: var(--text);
+        outline: none;
+        transition: var(--transition);
+        min-width: 120px;
+    }
+
+    input::placeholder {
+        color: rgba(0, 0, 0, 0.5);
+    }
+
+    input:focus, select:focus {
+        background: rgba(255, 255, 255, 1);
+        border-color: var(--primary);
+        box-shadow: 0 0 15px rgba(76, 175, 80, 0.2);
+        transform: translateY(-2px);
+    }
+
+    button {
+        padding: 12px 20px;
+        margin: 8px;
+        border-radius: var(--border-radius-sm);
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+    }
+
+    button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: var(--transition);
+    }
+
+    button:hover::before {
+        left: 100%;
+    }
+
+    .primary-btn { 
+        background: linear-gradient(45deg, var(--primary), var(--primary-dark)); 
+        color: white; 
+    }
+    .primary-btn:hover { 
+        background: linear-gradient(45deg, var(--primary-dark), var(--primary)); 
+        box-shadow: var(--shadow-md); 
+        transform: translateY(-2px); 
+    }
+
+    .secondary-btn { 
+        background: var(--bg-light); 
+        color: var(--primary-dark); 
+        border: 1px solid var(--primary); 
+    }
+    .secondary-btn:hover { 
+        background: rgba(76, 175, 80, 0.1); 
+        box-shadow: var(--shadow-md); 
+        transform: translateY(-2px); 
+    }
+
+    .danger-btn { 
+        background: linear-gradient(45deg, var(--danger), #c0392b); 
+        color: white; 
+    }
+    .danger-btn:hover { 
+        background: linear-gradient(45deg, #c0392b, var(--danger)); 
+        box-shadow: 0 6px 18px rgba(231, 76, 60, 0.4); 
+        transform: translateY(-2px); 
+    }
+
+    .subject {
+        font-weight: bold;
+        color: white;
+        padding: 8px 12px;
+        border-radius: var(--border-radius-sm);
+        display: inline-block;
+        min-width: 100px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+    }
+
+    .subject:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .kelas-chip {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: rgba(46, 125, 50, 0.15);
+        color: var(--primary-dark);
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .kelas-chip:hover {
+        transform: scale(1.05);
+        background: rgba(46, 125, 50, 0.25);
+    }
+
+    .day-tabs {
+        margin: 25px 0;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+
+    /* Scrollbar styling for day tabs */
+    .day-tabs::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .day-tabs::-webkit-scrollbar-track {
+        background: rgba(200, 230, 201, 0.5);
+        border-radius: 10px;
+    }
+
+    .day-tabs::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 10px;
+    }
+
+    .tab-btn {
+        padding: 12px 20px;
+        background: var(--bg-light);
+        border: 1px solid var(--primary);
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--primary-dark);
+        transition: var(--transition);
+        min-width: 100px;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tab-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+        color: white;
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .tab-btn.active::before {
+        opacity: 1;
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: rgba(76, 175, 80, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .day-table { 
+        display: none; 
+        animation: fadeIn 0.5s ease forwards; 
+    }
+
+    @keyframes fadeIn { 
+        from { 
+            opacity: 0; 
+            transform: translateY(20px); 
+        } 
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        } 
+    }
+
+    .day-table.active { 
+        display: table; 
+    }
+
+    #today {
+        font-weight: 600;
+        margin: 15px 0;
+        color: var(--primary-dark);
+        font-size: 1.1rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        background: var(--bg-lighter);
+        padding: 10px 20px;
+        border-radius: 20px;
+        display: inline-block;
+        transition: var(--transition);
+    }
+
+    #today:hover {
+        transform: scale(1.02);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .author { 
+        margin-top: 10px; 
+        color: var(--primary); 
+        font-style: italic; 
+        font-size: 0.9rem; 
+        transition: var(--transition);
+    }
+
+    .author:hover {
+        transform: translateX(5px);
+    }
+
+    .floating-icons { 
+        position: fixed; 
+        bottom: 20px; 
+        right: 20px; 
+        z-index: 100; 
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .floating-btn {
+        width: 60px; 
+        height: 60px; 
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+        color: white; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        box-shadow: var(--shadow-md);
+        cursor: pointer; 
+        transition: var(--transition); 
+        font-size: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .floating-btn::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transform: translateX(-100%);
+        transition: var(--transition);
+    }
+
+    .floating-btn:hover::before {
+        transform: translateX(100%);
+    }
+
+    .floating-btn:hover { 
+        transform: scale(1.1) rotate(10deg); 
+        box-shadow: var(--shadow-lg); 
+    }
+
+    .delete-btn {
+        background: transparent; 
+        border: none; 
+        cursor: pointer; 
+        font-size: 1.1rem;
+        line-height: 1; 
+        padding: 6px 10px; 
+        border-radius: var(--border-radius-sm); 
+        color: var(--danger);
+        transition: var(--transition);
+    }
+    
+    .delete-btn:hover { 
+        background: rgba(231, 76, 60, 0.15); 
+        transform: scale(1.2) rotate(5deg); 
+    }
+
+    /* Notification improvements */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 600;
+        z-index: 1000;
+        box-shadow: var(--shadow-lg);
+        transform: translateX(100%);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .notification.success {
+        background: linear-gradient(45deg, var(--success), #2ecc71);
+    }
+
+    .notification.error {
+        background: linear-gradient(45deg, var(--danger), #c0392b);
+    }
+
+    .notification.warning {
+        background: linear-gradient(45deg, var(--warning), #e67e22);
+    }
+
+    .notification.info {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+    }
+
+    /* Loading animation */
+    .loader {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-content { 
+            flex-direction: column; 
+            text-align: center; 
+        }
+        
+        .header-logo { 
+            width: 70px; 
+            height: 70px; 
+        }
+        
+        h1 { 
+            font-size: 1.8rem; 
+        }
+        
+        .container { 
+            padding: 0 15px; 
+        }
+        
+        input, select, button { 
+            width: 100%; 
+            margin: 8px 0; 
+        }
+        
+        .day-tabs { 
+            flex-direction: row; 
+            justify-content: flex-start;
+            padding-bottom: 15px;
+        }
+        
+        .tab-btn { 
+            width: auto; 
+            min-width: 90px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+        }
+        
+        table { 
+            font-size: 0.9rem; 
+        }
+        
+        th, td { 
+            padding: 10px 5px; 
+        }
+        
+        /* Improve form layout on mobile */
+        .form-section {
+            padding: 15px;
+        }
+
+        /* Adjust floating buttons on mobile */
+        .floating-icons {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .floating-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+    }
+
+    /* Animasi muncul */
+    .fade-in { 
+        opacity: 0; 
+        transform: translateY(20px); 
+        animation: fadeInUp 0.6s ease forwards; 
+    }
+    
+    @keyframes fadeInUp { 
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        } 
+    }
+    
+    .fade-in:nth-child(1) { animation-delay: 0.1s; }
+    .fade-in:nth-child(2) { animation-delay: 0.2s; }
+    .fade-in:nth-child(3) { animation-delay: 0.3s; }
+    .fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+    /* Ripple effect */
+    .ripple {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ripple-effect {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+    }
+
+    @keyframes ripple {
+        to {
+            transform: scale(2.5);
+            opacity: 0;
+        }
+    }
+</style>
+</head>
+<body>
+
+<!-- Login Overlay -->
+<div id="loginOverlay">
+    <div id="loginBox">
+        <div class="school-logo">
+            <img src="1002764461[1].png" />
+        </div>
+        <h2>SDIT CAHAYA IMAN</h2>
+        <input type="password" id="passwordInput" placeholder="Masukkan Password" autocomplete="off" />
+        <button id="loginBtn">Masuk</button>
+        <div id="errorMsg"></div>
+    </div>
+</div>
+
+<header>
+    <div class="header-content">
+        <div class="header-logo">
+            <img src="1002764461[1].png" />
+        </div>
+        <div class="school-title">
+            <h1>JADWAL PEMBELAJARAN SDIT CAHAYA IMAN</h1>
+            <p id="today"></p>
+            <p class="author">Codingan by Rohimat</p>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Form Input Jadwal -->
+    <div class="form-section fade-in">
+        <h2>Tambah Jadwal Baru</h2>
+        <select id="day">
+            <option>Senin</option>
+            <option>Selasa</option>
+            <option>Rabu</option>
+            <option>Kamis</option>
+            <option>Jumat</option>
+        </select>
+        <select id="classLevel" title="Kelas">
+            <option value="1">Kelas 1</option>
+            <option value="2">Kelas 2</option>
+            <option value="3">Kelas 3</option>
+            <option value="4">Kelas 4</option>
+            <option value="5">Kelas 5</option>
+        </select>
+        <input type="text" id="subject" placeholder="Mata Pelajaran" />
+        <input type="text" id="teacher" placeholder="Nama Guru" />
+        <input type="time" id="startTime" />
+        <input type="time" id="endTime" />
+        <button class="primary-btn" onclick="addSchedule()">➕ Tambah Jadwal</button>
+    </div>
+
+    <!-- Tabel Jadwal / Filter -->
+    <div class="form-section fade-in">
+        <h2>Filter Jadwal</h2>
+        <select id="teacherFilter" onchange="filterByTeacher()" title="Filter Guru">
+            <option value="all">👥 Semua Guru</option>
+            <!-- Diisi dinamis -->
+        </select>
+        <select id="classFilter" onchange="filterByClass()" title="Filter Kelas">
+            <option value="all">🏫 Semua Kelas</option>
+            <option value="1">Kelas 1</option>
+            <option value="2">Kelas 2</option>
+            <option value="3">Kelas 3</option>
+            <option value="4">Kelas 4</option>
+            <option value="5">Kelas 5</option>
+        </select>
+        <button class="secondary-btn" onclick="resetFilter()">🔄 Tampilkan Semua</button>
+    </div>
+
+    <div class="day-tabs fade-in">
+        <button class="tab-btn active" onclick="filterByDay('Senin')">📅 Senin</button>
+        <button class="tab-btn" onclick="filterByDay('Selasa')">📅 Selasa</button>
+        <button class="tab-btn" onclick="filterByDay('Rabu')">📅 Rabu</button>
+        <button class="tab-btn" onclick="filterByDay('Kamis')">📅 Kamis</button>
+        <button class="tab-btn" onclick="filterByDay('Jumat')">📅 Jumat</button>
+    </div>
+
+    <h2 class="fade-in">📋 JADWAL GURU SDIT CAHAYA IMAN</h2>
+    <div id="scheduleTables">
+        <!-- Day tables generated by JS -->
+    </div>
+
+</div>
+
+<div class="floating-icons">
+    <div class="floating-btn" onclick="scrollToTop()" title="Kembali ke Atas">⬆️</div>
+    <div class="floating-btn" onclick="refreshPage()" title="Refresh Halaman">🔄</div>
+</div>
+
+<script>
+    // ====== KONFIGURASI LOGIN ======
+    const correctPassword = "Rohimatganteng";
+
+    const loginOverlay = document.getElementById('loginOverlay');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const loginBox = document.getElementById('loginBox');
+
+    // Add ripple effect to buttons
+    function createRipple(event) {
+        const button = event.currentTarget;
+        const circle = document.createElement("span");
+        const diameter = Math.max(button.clientWidth, button.clientHeight);
+        const radius = diameter / 2;
+
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
+        circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
+        circle.classList.add("ripple-effect");
+
+        const ripple = button.getElementsByClassName("ripple-effect")[0];
+        if (ripple) ripple.remove();
+
+        button.appendChild(circle);
+    }
+
+    // Add ripple to all buttons
+    document.querySelectorAll('button').forEach(button => {
+        button.classList.add('ripple');
+        button.addEventListener('click', createRipple);
+    });
+
+    function checkPassword() {
+        const entered = passwordInput.value.trim();
+        if (entered === correctPassword) {
+            loginOverlay.classList.add('hidden');
+            setTimeout(() => { loginOverlay.style.display = 'none'; }, 500);
+            errorMsg.textContent = ""; 
+            passwordInput.value = "";
+            // Tampilkan konten utama
+            boot();
+        } else {
+            errorMsg.textContent = "Password salah, coba lagi!";
+            passwordInput.value = ""; 
+            passwordInput.focus();
+            loginBox.style.animation = 'shake 0.5s ease';
+            setTimeout(() => { loginBox.style.animation = ''; }, 500);
+        }
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shake { 
+            0%, 100% { transform: translateX(0); } 
+            25% { transform: translateX(-10px); } 
+            75% { transform: translateX(10px); } 
+                    }
+    `;
+    document.head.appendChild(style);
+
+    loginBtn.addEventListener('click', checkPassword);
+    passwordInput.addEventListener('keyup', function(e) { if (e.key === 'Enter') checkPassword(); });
+
+    function animateElements() {
+        const elements = document.querySelectorAll('.fade-in');
+        elements.forEach((el, index) => { el.style.animationDelay = `${index * 0.2}s`; });
+    }
+
+    function scrollToTop() { 
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    }
+    
+    function refreshPage() { 
+        // Add a nice fade out effect before reloading
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => location.reload(), 500);
+    }
+
+    // ====== DATA & UTILITAS ======
+    const colorMap = {
+        "Matematika": "#3498db",
+        "Bahasa Indonesia": "#e74c3c",
+        "IPA": "#27ae60",
+        "IPS": "#8e44ad",
+        "Seni": "#f1c40f",
+        "Olahraga": "#e67e22",
+        "Agama": "#1abc9c",
+        "PKN": "#9b59b6",
+        "Bahasa Inggris": "#f39c12",
+        "Komputer": "#16a085",
+        "Pramuka": "#d35400",
+        "Mulok": "#c0392b"
+    };
+
+    let schedule = [];
+    let currentDay = 'Senin';
+    let currentTeacher = 'all';
+    let currentClass = 'all';
+
+    function boot() {
+        // Load data & migrasi jika perlu
+        schedule = JSON.parse(localStorage.getItem("schedule")) || [];
+        migrateSchedule();
+        displaySchedule();
+        showToday();
+        animateElements();
+        
+        // Add subtle animation to background
+        animateBackground();
+    }
+
+    function animateBackground() {
+        // Create floating elements in background
+        const bgAnimation = document.createElement('div');
+        bgAnimation.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        `;
+        document.body.appendChild(bgAnimation);
+        
+        // Add floating elements
+        for (let i = 0; i < 15; i++) {
+            const floatElement = document.createElement('div');
+            floatElement.style.cssText = `
+                position: absolute;
+                width: ${20 + Math.random() * 30}px;
+                height: ${20 + Math.random() * 30}px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                animation: float 15s infinite ease-in-out;
+                animation-delay: ${Math.random() * 15}s;
+            `;
+            floatElement.style.left = `${Math.random() * 100}%`;
+            floatElement.style.top = `${Math.random() * 100}%`;
+            bgAnimation.appendChild(floatElement);
+        }
+        
+        // Add the animation
+        const floatAnimation = document.createElement('style');
+        floatAnimation.textContent = `
+            @keyframes float {
+                0%, 100% { 
+                    transform: translate(0, 0) rotate(0deg); 
+                    opacity: 0.5;
+                }
+                25% { 
+                    transform: translate(${Math.random() * 100}px, ${Math.random() * 100}px) rotate(90deg); 
+                    opacity: 0.8;
+                }
+                50% { 
+                    transform: translate(${Math.random() * -100}px, ${Math.random() * 100}px) rotate(180deg); 
+                    opacity: 0.6;
+                }
+                75% { 
+                    transform: translate(${Math.random() * -100}px, ${Math.random() * -100}px) rotate(270deg); 
+                    opacity: 0.9;
+                }
+            }
+        `;
+        document.head.appendChild(floatAnimation);
+    }
+
+    function migrateSchedule() {
+        let changed = false;
+        schedule = schedule.map(item => {
+            // Tambahkan id unik jika belum ada (untuk hapus per baris)
+            if (!item.id) { item.id = `id_${Date.now()}_${Math.random().toString(36).slice(2)}`; changed = true; }
+            // Tambah classLevel default jika belum ada
+            if (!('classLevel' in item)) { item.classLevel = 'unknown'; changed = true; }
+            return item;
+        });
+        if (changed) localStorage.setItem('schedule', JSON.stringify(schedule));
+    }
+
+    // ====== RENDER KOMPONEN ======
+    function displaySchedule() {
+        updateTeacherDropdown();
+        buildDayTables();
+        applyFilters();
+    }
+
+    function buildDayTables() {
+        const wrap = document.getElementById('scheduleTables');
+        wrap.innerHTML = '';
+        const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        days.forEach(day => {
+            const table = document.createElement('table');
+            table.className = 'day-table';
+            table.id = `table-${day}`;
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Hari</th>
+                        <th>Mata Pelajaran</th>
+                        <th>Guru</th>
+                        <th>Jam Pelajaran</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+            wrap.appendChild(table);
+        });
+    }
+
+    function updateTeacherDropdown() {
+        const teacherSet = new Set();
+        schedule.forEach(item => { if (item.teacher) teacherSet.add(item.teacher); });
+        const dropdown = document.getElementById('teacherFilter');
+        dropdown.innerHTML = '<option value="all">👥 Semua Guru</option>';
+        Array.from(teacherSet).sort().forEach(teacher => {
+            const option = document.createElement('option');
+            option.value = teacher; 
+            option.textContent = `👤 ${teacher}`; 
+            dropdown.appendChild(option);
+        });
+    }
+
+    // ====== TAMBAH / HAPUS ======
+    function addSchedule() {
+        const day = document.getElementById("day").value;
+        const classLevel = document.getElementById("classLevel").value;
+        const subject = document.getElementById("subject").value.trim();
+        const teacher = document.getElementById("teacher").value.trim();
+        const startTime = document.getElementById("startTime").value;
+        const endTime = document.getElementById("endTime").value;
+
+        if (!subject || !teacher || !startTime || !endTime) {
+            showNotification("Harap lengkapi semua data!", "error");
+            return;
+        }
+
+        const item = {
+            id: `id_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+            day, classLevel, subject, teacher, startTime, endTime
+        };
+        
+        // Add animation effect
+        const formSection = document.querySelector('.form-section');
+        formSection.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+            formSection.style.transform = '';
+        }, 200);
+        
+        schedule.push(item);
+        localStorage.setItem("schedule", JSON.stringify(schedule));
+        showNotification("Jadwal berhasil ditambahkan!", "success");
+        displaySchedule();
+
+        // Reset form dengan animasi
+        document.getElementById("subject").value = "";
+        document.getElementById("teacher").value = "";
+        document.getElementById("startTime").value = "";
+        document.getElementById("endTime").value = "";
+        
+        // Animate the new entry in the table
+        highlightNewEntry(item.id);
+    }
+
+    function highlightNewEntry(id) {
+        setTimeout(() => {
+            const newRow = document.querySelector(`button[onclick="deleteById('${id}')"]`)?.closest('tr');
+            if (newRow) {
+                newRow.style.background = 'rgba(76, 175, 80, 0.3)';
+                newRow.style.transition = 'background 1.5s ease';
+                
+                setTimeout(() => {
+                    newRow.style.background = '';
+                }, 1500);
+            }
+        }, 500);
+    }
+
+    function deleteById(id) {
+        const idx = schedule.findIndex(x => x.id === id);
+        if (idx === -1) return;
+        
+        // Animation before deletion
+        const row = document.querySelector(`button[onclick="deleteById('${id}')"]`)?.closest('tr');
+        if (row) {
+            row.style.transform = 'translateX(100px)';
+            row.style.opacity = '0';
+            row.style.transition = 'all 0.5s ease';
+        }
+        
+        setTimeout(() => {
+            if (!confirm('Hapus jadwal ini?')) {
+                if (row) {
+                    row.style.transform = '';
+                    row.style.opacity = '';
+                }
+                return;
+            }
+            
+            schedule.splice(idx, 1);
+            localStorage.setItem('schedule', JSON.stringify(schedule));
+            showNotification('Jadwal dihapus!', 'info');
+            applyFilters();
+        }, 500);
+    }
+
+    // ====== FILTER ======
+    function filterByTeacher() { 
+        currentTeacher = document.getElementById('teacherFilter').value; 
+        applyFilters(); 
+    }
+    
+    function filterByClass() { 
+        currentClass = document.getElementById('classFilter').value; 
+        applyFilters(); 
+    }
+
+    function filterByDay(day) {
+        // Animation for tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if (btn.textContent.includes(day)) {
+                btn.classList.add('active');
+                btn.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                }, 200);
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        currentDay = day;
+        applyFilters();
+    }
+
+    function applyFilters() {
+        // Filter awal by day
+        let filtered = schedule.filter(item => item.day === currentDay);
+        // Filter guru
+        if (currentTeacher !== 'all') filtered = filtered.filter(item => item.teacher === currentTeacher);
+        // Filter kelas (1..5); item.classLevel bisa 'unknown'
+        if (currentClass !== 'all') filtered = filtered.filter(item => String(item.classLevel) === String(currentClass));
+
+        // Tampilkan hanya tabel hari aktif dengan animasi
+        document.querySelectorAll('.day-table').forEach(table => {
+            if (table.id === `table-${currentDay}`) {
+                table.classList.add('active');
+                table.style.animation = 'fadeIn 0.5s ease forwards';
+            } else {
+                table.classList.remove('active');
+            }
+        });
+
+        renderSchedule(filtered);
+    }
+
+    function resetFilter() {
+        currentDay = 'Senin'; 
+        currentTeacher = 'all'; 
+        currentClass = 'all';
+        document.getElementById('teacherFilter').value = 'all';
+        document.getElementById('classFilter').value = 'all';
+        
+        // Animate tab reset
+        document.querySelectorAll('.tab-btn').forEach((btn, index) => {
+            btn.classList.remove('active');
+            if (index === 0) {
+                btn.classList.add('active');
+                btn.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                }, 200);
+            }
+        });
+        
+        applyFilters();
+        showNotification("Filter direset!", "info");
+    }
+
+    function renderSchedule(items) {
+        // Bersihkan semua tbody
+        document.querySelectorAll('.day-table tbody').forEach(tbody => { 
+            tbody.innerHTML = ''; 
+        });
+
+        // Isi baris untuk hari aktif saja
+        items.forEach((item, index) => {
+            const table = document.getElementById(`table-${item.day}`);
+            if (!table) return;
+            const tbody = table.querySelector('tbody');
+            const subjectColor = colorMap[item.subject] || "#7f8c8d";
+            const kelasLabel = item.classLevel && item.classLevel !== 'unknown' ? `Kelas ${item.classLevel}` : 'Tanpa Kelas';
+            const row = document.createElement('tr');
+            
+            // Add animation delay based on index
+            row.style.animationDelay = `${index * 0.1}s`;
+            row.classList.add('fade-in');
+            
+            row.innerHTML = `
+                <td>${item.day}</td>
+                <td>
+                    <span class="subject" style="background:${subjectColor}">${item.subject}</span>
+                    <span class="kelas-chip">${kelasLabel}</span>
+                </td>
+                <td>👤 ${item.teacher}</td>
+                <td>⏰ ${item.startTime} - ${item.endTime}</td>
+                <td><button class="delete-btn" title="Hapus" onclick="deleteById('${item.id}')">❌</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // Jika kosong
+        if (items.length === 0) {
+            const table = document.getElementById(`table-${currentDay}`);
+            if (table) {
+                const tbody = table.querySelector('tbody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="padding: 30px; color: var(--primary); font-style: italic;">
+                            📝 Tidak ada jadwal untuk filter saat ini
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+    }
+
+    // ====== INFO WAKTU ======
+    function showToday() {
+        const days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+        const today = new Date();
+        const dayName = days[today.getDay()];
+        document.getElementById("today").innerHTML = `
+            📅 Hari ini: <strong>${dayName}</strong>, ${today.toLocaleDateString('id-ID')}
+        `;
+        
+        // Highlight today's tab if it's a weekday
+        if (dayName !== "Minggu" && dayName !== "Sabtu") {
+            const todayBtn = Array.from(document.querySelectorAll('.tab-btn'))
+                .find(btn => btn.textContent.includes(dayName));
+            if (todayBtn) {
+                todayBtn.style.background = 'linear-gradient(45deg, var(--accent), var(--warning))';
+                todayBtn.style.color = '#000';
+                todayBtn.style.fontWeight = 'bold';
+            }
+        }
+    }
+
+    // ====== NOTIFIKASI ======
+    function showNotification(message, type = "info") {
+        // Remove any existing notifications
+        document.querySelectorAll('.notification').forEach(el => el.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            ${type === "success" ? "✅" : type === "error" ? "❌" : type === "warning" ? "⚠️" : "ℹ️"} 
+            ${message}
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Animate out after 3 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+Enter to submit form
+        if (e.ctrlKey && e.key === 'Enter') {
+            addSchedule();
+        }
+        
+        // Escape to clear filters
+        if (e.key === 'Escape') {
+            resetFilter();
+        }
+    });
+
+    // Add hover effects to all interactive elements
+    document.querySelectorAll('button, input, select, .subject, .kelas-chip').forEach(el => {
+        el.style.transition = 'var(--transition)';
+    });
+
+    // Catatan: boot() dipanggil setelah login berhasil
+</script>
+
+</body>
+</html>
